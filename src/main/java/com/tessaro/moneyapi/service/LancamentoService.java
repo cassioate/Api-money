@@ -53,6 +53,9 @@ public class LancamentoService {
 	
 	public Lancamento atualizar (Long id, Lancamento lancamento) {
 		Lancamento lancamentoSalva = buscarLancamentoPeloId(id);
+		if (!lancamentoSalva.getPessoa().equals(lancamento.getPessoa())) {
+			validarPessoa(lancamento);
+		}
 		BeanUtils.copyProperties(lancamento, lancamentoSalva, "codigo");
 		repository.save(lancamentoSalva);
 		return lancamentoSalva;
@@ -121,6 +124,16 @@ public class LancamentoService {
 			throw new EntityNotFoundException();
 		}
 		return lancamentoSalva;
+	}
+	
+	private void validarPessoa (Lancamento lancamento) {
+		Pessoa pessoa = null;
+		if (lancamento.getPessoa().getCodigo() != null) {
+			pessoa = repository.findById(lancamento.getPessoa().getCodigo()).get().getPessoa();
+		}
+		if (pessoa == null || !pessoa.isAtivo()) {
+			throw new InexistenteOuInativoException();
+		}
 	}
 	
 }

@@ -32,4 +32,12 @@ public class Pessoa {
 	private Endereco endereco;
 
 
+	public boolean isAtivo() {
+		if (ativo == true) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 }

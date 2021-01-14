@@ -7,11 +7,14 @@ import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.tessaro.moneyapi.model.Endereco;
 import com.tessaro.moneyapi.model.Pessoa;
 import com.tessaro.moneyapi.repository.PessoaRepository;
+
 
 @Service
 public class PessoaService {
@@ -59,6 +62,11 @@ public class PessoaService {
 	
 	public void remover (Long id) {
 		repository.deleteById(id);
+	}
+	
+
+	public Page<Pessoa> findByNomeContaining(String nome, Pageable pageable) {
+		return repository.findByNomeContaining(nome, pageable);
 	}
 	
 	
