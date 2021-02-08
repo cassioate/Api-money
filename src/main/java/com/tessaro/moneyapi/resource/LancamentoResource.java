@@ -26,12 +26,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tessaro.moneyapi.event.RecursoCriadoEvent;
 import com.tessaro.moneyapi.exceptionhandler.Erro;
 import com.tessaro.moneyapi.model.Lancamento;
+import com.tessaro.moneyapi.model.dto.LancamentoDTO;
 import com.tessaro.moneyapi.model.enumeration.LancamentoEnum;
 import com.tessaro.moneyapi.repository.filter.LancamentoFilter;
 import com.tessaro.moneyapi.service.LancamentoService;
@@ -57,6 +60,7 @@ public class LancamentoResource {
 	public Page<Lancamento> buscar(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		return service.buscar(lancamentoFilter, pageable);
 	}
+	
 	
 	@PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
 	@GetMapping(value = "/{id}")
@@ -157,5 +161,29 @@ public class LancamentoResource {
 		List<Erro> erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDev));
 		return ResponseEntity.badRequest().body(erros);
 	}
+	
+	@RequestMapping(params = "resumo", method=RequestMethod.GET)
+	public ResponseEntity<Page<LancamentoDTO>> findPage(@RequestParam(value="page", defaultValue="0") Integer page, @RequestParam(value="linesPerPage", defaultValue="5") Integer linesPerPage, 
+			@RequestParam(value="orderBy", defaultValue="dataVencimento") String orderBy, @RequestParam(value="direction", defaultValue="ASC") String direction,
+			@RequestParam(value="descricao", required = false)String descricao, @RequestParam(value="dataVencimentoDe", defaultValue="0001-01-01",required = false)String dataVencimentoInicio, 
+			@RequestParam(value="dataVencimentoAte", defaultValue="3000-12-30", required = false)String dataVencimentoFim) {
+		Page<Lancamento> list = service.findPage(page, linesPerPage, orderBy, direction, descricao, dataVencimentoInicio, dataVencimentoFim);
+		Page<LancamentoDTO> listDto = list.map(obj -> new LancamentoDTO(
+				obj.getCodigo(),
+				obj.getDescricao(),
+				obj.getDataVencimento(),
+				obj.getDataPagamento(),
+				obj.getValor(),
+				obj.getTipo(),
+				obj.getCategoria().getNome(),
+				obj.getPessoa().getNome()));  
+		return ResponseEntity.ok().body(listDto);
+	}
+	
+//	@GetMapping(params = "resumo")
+//	@PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
+//	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
+//		return service.resumo(lancamentoFilter, pageable);
+//	}
 	
 }

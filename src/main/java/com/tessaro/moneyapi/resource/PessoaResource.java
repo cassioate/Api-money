@@ -1,6 +1,5 @@
 package com.tessaro.moneyapi.resource;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
@@ -41,11 +40,17 @@ public class PessoaResource {
 	@Autowired
 	private ApplicationEventPublisher publisher; /* Utilizado para publicar o URI que é criado no RecursoCriadoEvent*/
 	
-	@PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
 	@GetMapping
-	public List<Pessoa> findAll() {
-		return service.findAll();
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA')")
+	public Page<Pessoa> pesquisar(@RequestParam(required = false, defaultValue = "%") String nome, Pageable pageable) {
+		return service.findByNomeContaining(nome, pageable);
 	}
+	
+//	@PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
+//	@GetMapping
+//	public List<Pessoa> findAll() {
+//		return service.findAll();
+//	}
 	
 	@PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
 	@GetMapping(value = "/{id}")
@@ -102,10 +107,6 @@ public class PessoaResource {
 		throw new NotFoundException("varaivel não existe");
 	}
 	
-	@GetMapping
-	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA')")
-	public Page<Pessoa> pesquisar(@RequestParam(required = false, defaultValue = "%") String nome, Pageable pageable) {
-		return service.findByNomeContaining(nome, pageable);
-	}
+
 	
 }
